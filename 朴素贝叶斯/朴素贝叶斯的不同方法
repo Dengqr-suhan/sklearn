@@ -1,0 +1,98 @@
+#贝努力贝叶斯
+#被称为二项分布或0-1分布
+from sklearn.naive_bayes import BernoulliNB
+import numpy as np
+#导入数据生成工具
+from sklearn.datasets import make_blobs
+#导入数据拆分工具
+from sklearn.model_selection import train_test_split
+#生成样本数量为500，分类数为5的数据集
+X ,y = make_blobs(centers=5, n_samples=500, random_state=8)
+X_train, X_test, y_train, y_test =train_test_split(X, y, random_state=8)
+
+nb = BernoulliNB()
+nb.fit(X_train, y_train)
+print('nb模型得分为{}'.format(nb.score(X_test, y_test)))
+
+#接下来，我们来绘制散点图来看看具体情况
+import matplotlib.pyplot as plt
+#限定横纵坐标最大值
+x_min, x_max = X[:,0].min()-0.5, X[:,0].max()+0.5
+y_min, y_max = X[:,1].min()-0.5, X[:,1].max()+0.5
+#用不同的背景色来代表不同的分类
+xx,yy = np.meshgrid(
+    np.arange(x_min, x_max, .02),
+    np.arange(y_min, y_max, .02)
+)
+z = nb.predict(np.c_[(xx.ravel(),yy.ravel())]).reshape(xx.shape)
+plt.pcolormesh(xx, yy, z, cmap=plt.cm.Spectral)
+#将训练集和测试集用散点图表示
+plt.scatter(X_train[:,0], X_train[:,1],c=y_train,cmap=plt.cm.cool,edgecolors='k')
+plt.scatter(X_test[:,0], X_test[:,1],c=y_test,cmap=plt.cm.cool,edgecolors='k',marker='*')
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
+plt.title("Classifier: BernoulliNB")
+plt.show()
+#散点图表示 此算法极其敷衍 接下来我们来用用另一种方法来试试
+#高斯贝叶斯 又称正态分布算法
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+gnb.fit(X_train,y_train)
+print('gnb模型得分：{}'.format(gnb.score(X_test, y_test)))
+#得分非常高
+#接下来用图表看看，限定横纵坐标最大值
+x_min, x_max = X[:,0].min()-0.5, X[:,0].max()+0.5
+y_min, y_max = X[:,1].min()-0.5, X[:,1].max()+0.5
+#用不同的背景色来代表不同的分类
+xx,yy = np.meshgrid(
+    np.arange(x_min, x_max, .02),
+    np.arange(y_min, y_max, .02)
+)
+z = gnb.predict(np.c_[(xx.ravel(),yy.ravel())]).reshape(xx.shape)#这里是唯一要改变的地方，python来解决重复性的问题简直无敌
+plt.pcolormesh(xx, yy, z, cmap=plt.cm.Spectral)
+#将训练集和测试集用散点图表示
+plt.scatter(X_train[:,0], X_train[:,1],c=y_train,cmap=plt.cm.cool,edgecolors='k')
+plt.scatter(X_test[:,0], X_test[:,1],c=y_test,cmap=plt.cm.cool,edgecolors='k',marker='*')
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
+plt.title("Classifier: GaussianNB")
+plt.show()
+#接下来我们来介绍第三种方法————多项式朴素贝叶斯
+#解释：这是二项式的升级版，贝努力是硬币，多项式是抛骰子
+from sklearn.naive_bayes import MultinomialNB
+mnb = MultinomialNB()
+"""
+mnb.fit(X_train, y_train)
+mnb.score(X_test, y_test)
+
+以上代码会报错，因为多项式朴素贝叶斯的X中的值必须是非负的
+
+所以我们必须要进行数据预处理
+
+"""
+from sklearn.preprocessing import MinMaxScaler
+#使用minmaxscaler对数据进行预处理，使数据全部为非负
+scaler = MinMaxScaler()
+scaler.fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+#对其进行使用
+mnb.fit(X_train_scaled,y_train)
+print('mnb模型得分为{}'.format(mnb.score(X_test_scaled,y_test)))
+#画图看看
+x_min, x_max = X[:,0].min()-0.5, X[:,0].max()+0.5
+y_min, y_max = X[:,1].min()-0.5, X[:,1].max()+0.5
+#用不同的背景色来代表不同的分类
+xx,yy = np.meshgrid(
+    np.arange(x_min, x_max, .02),
+    np.arange(y_min, y_max, .02)
+)
+z = mnb.predict(np.c_[(xx.ravel(),yy.ravel())]).reshape(xx.shape)#这里是唯一要改变的地方，python来解决重复性的问题简直无敌
+plt.pcolormesh(xx, yy, z, cmap=plt.cm.Spectral)
+#将训练集和测试集用散点图表示
+plt.scatter(X_train[:,0], X_train[:,1],c=y_train,cmap=plt.cm.cool,edgecolors='k')
+plt.scatter(X_test[:,0], X_test[:,1],c=y_test,cmap=plt.cm.cool,edgecolors='k',marker='*')
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
+plt.title("Classifier: MultinomialNB")
+plt.show()

@@ -1,0 +1,62 @@
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+#导入tree模型和数据集加载工具
+from sklearn import tree, datasets
+from sklearn.model_selection import train_test_split
+wine = datasets.load_wine()
+#只选取数据集前两个特征
+X = wine.data[:,:2]
+y = wine.target
+X_train, X_test, y_train, y_test = train_test_split(X, y)
+
+#设定决策树分类器最大深度（所问问题的数量）
+clf = tree.DecisionTreeClassifier(max_depth=1)
+clf.fit(X_train, y_train)
+
+#现在看看分类器的表现如何，我们来画图
+#定义图像中分区的颜色和散点的颜色
+def plot(clfn):
+    cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
+    cmap_bold = ListedColormap(['#FF0000', '#00FF00', '#0000FF'])
+#分别用样本的两个特征值来创建图像的横轴和纵轴
+    x_min, x_max = X_train[:,0].min()-1, X_train[:,0].max()+1
+    y_min, y_max = X_train[:,1].min()-1, X_train[:,1].max()+1
+
+    xx, yy = np.meshgrid(
+        np.arange(x_min, x_max, .02),
+        np.arange(y_min, y_max, .02)
+    )
+    z = clfn.predict(np.c_[xx.ravel(), yy.ravel()])
+#给每个分类中的样本分配不同的颜色
+    z = z.reshape(xx.shape)
+    plt.figure()
+    plt.pcolormesh(xx, yy, z, cmap=cmap_light)
+
+#用散点把样本表示出来
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap_bold, edgecolors='k', s=20)
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    plt.title("Classifier : {}".format(clfn))
+    plt.show()
+
+plot(clf)
+#再试试max_depth=3
+clf2 = tree.DecisionTreeClassifier(max_depth=3)
+clf2.fit(X_train, y_train)
+plot(clf2)
+
+clf3 = tree.DecisionTreeClassifier(max_depth=5)
+clf3.fit(X_train, y_train)
+plot(clf3)
+print('clf train模型得分为{:.3f}'.format(clf3.score(X_train, y_train)))
+print('clf test模型得分为{:.3f}'.format(clf3.score(X_test, y_test)))
+
+#接下来我们来看看流程图
+import graphviz
+#导入决策树中输出graphviz的接口
+from sklearn.tree import export_graphviz
+export_graphviz(clf2, out_file="wine.dot", class_names=wine.target_names, feature_names=wine.feature_names[:2], impurity=False, filled=True)
+with open("wine.dot") as f:
+    dot_graph = f.read()
+    graphviz.Source(dot_graph)

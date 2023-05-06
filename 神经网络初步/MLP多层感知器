@@ -1,0 +1,72 @@
+#多层神经网络称为深度学习
+import numpy as np
+import matplotlib.pyplot as plt
+line = np.linspace(-5, 5, 200)
+#神经网络中的非线性矫正，我们来用图表来表示一下
+plt.plot(line, np.tanh(line), label='tanh')
+plt.plot(line, np.maximum(line, 0), label="relu")
+plt.legend(loc='best')
+plt.xlabel('x')
+plt.ylabel("relu(x) and tanh(x)")
+plt.show()
+#大型神经网络中有很多隐藏层， 这也是深度学习里深度二字的含义
+#接下来我们来用用MLP分类器来试试
+from sklearn.model_selection import train_test_split
+from sklearn.datasets import load_wine
+from sklearn.neural_network import MLPClassifier
+wine = load_wine()
+X = wine.data[:,:2]
+y = wine.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+#接下来我们来定义分类器
+mlp = MLPClassifier(solver='lbfgs')
+mlp.fit(X_train, y_train)
+
+#定义图像中分区的颜色和散点的颜色
+from matplotlib.colors import ListedColormap
+def plot(clfn):
+    cmap_light = ListedColormap(['#FFAAAA', '#AAFFAA', '#AAAAFF'])
+    cmap_bold = ListedColormap(['#FF0000', '#00FF00', '#0000FF'])
+#分别用样本的两个特征值来创建图像的横轴和纵轴
+    x_min, x_max = X_train[:,0].min()-1, X_train[:,0].max()+1
+    y_min, y_max = X_train[:,1].min()-1, X_train[:,1].max()+1
+
+    xx, yy = np.meshgrid(
+        np.arange(x_min, x_max, .02),
+        np.arange(y_min, y_max, .02)
+    )
+    z = clfn.predict(np.c_[xx.ravel(), yy.ravel()])
+#给每个分类中的样本分配不同的颜色
+    z = z.reshape(xx.shape)
+    plt.figure()
+    plt.pcolormesh(xx, yy, z, cmap=cmap_light)
+
+#用散点把样本表示出来
+    plt.scatter(X[:, 0], X[:, 1], c=y, cmap=cmap_bold, edgecolors='k', s=60)
+    plt.xlim(xx.min(), xx.max())
+    plt.ylim(yy.min(), yy.max())
+    plt.title("Classifier : {}".format(clfn))
+    plt.show()
+
+plot(mlp)
+
+#我们尝试把隐藏层的节点减少 减少到10个
+mlp_10 = MLPClassifier(solver='lbfgs', hidden_layer_sizes=[10])
+mlp_10.fit(X_train, y_train)
+plot(mlp_10)
+
+#我们试试增加隐藏层数
+mlp_2l = MLPClassifier(solver='lbfgs', hidden_layer_sizes=[10, 10])
+mlp_2l.fit(X_train, y_train)
+plot(mlp_2l)
+print(mlp_2l.score(X_test, y_test))
+#我们试试把activating参数改为tanh
+mlp_tanh = MLPClassifier(solver="lbfgs", hidden_layer_sizes={10,10}, activation="tanh")
+mlp_tanh.fit(X_train, y_train)
+plot(mlp_tanh)
+print(mlp_tanh.score(X_test, y_test))
+#我们再试试调整alpha参数 改变正则化程度
+mlp_alpha = MLPClassifier(solver="lbfgs", hidden_layer_sizes=[10,10], activation="tanh", alpha=1)
+mlp_alpha.fit(X_train, y_train)
+plot(mlp_alpha)
+print(mlp_alpha.score(X_test, y_test))

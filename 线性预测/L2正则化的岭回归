@@ -1,0 +1,61 @@
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Ridge
+import matplotlib.pyplot as plt
+import numpy as np
+X, y = load_diabetes().data, load_diabetes().target
+X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=8)
+ridge = Ridge().fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(ridge.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(ridge.score(X_test, y_test)))
+#虽然分数低了，但是测试集得分和训练集得分一模一样
+
+#岭回归可以通过修改alpha值，来得到我们想要的结果
+ridge10 = Ridge(alpha=10).fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(ridge10.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(ridge10.score(X_test, y_test)))
+#通过提高alpha值来降低过拟合的程度
+#若alpha值为0 那么岭回归和线性回归就没有区别了
+#我们可以将alpha理解为限制的条件，要是限制条件越高 模型的准确度是会降低的
+ridge01 = Ridge(alpha=0.1).fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(ridge01.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(ridge01.score(X_test, y_test)))
+
+#我们来通过图表来展示这些数据
+plt.plot(ridge.coef_, 's', label = "ridge alpha = 1")
+plt.plot(ridge10.coef_, '^', label = "ridge alpha = 10")
+plt.plot(ridge01.coef_, 'v', label = "ridge alpha = 0.1")
+plt.xlabel('coefficient index')
+plt.ylabel('coefficient magnitude')
+plt.hlines(0, 0, len(ridge01.coef_))
+plt.legend()
+plt.show()
+
+#接下来我们来绘制学习曲线，发现岭回归和线性回归的区别
+from sklearn.linear_model import LinearRegression
+lr = LinearRegression().fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(lr.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(lr.score(X_test, y_test)))
+
+from sklearn.model_selection import learning_curve, KFold
+#定义一个绘制学习曲线的函数
+def plot_learning_curve(est,X,y):
+    train_set_size,train_scores, test_scores = learning_curve(
+        est,X,y,train_sizes=np.linspace(.1, 1, 20), cv=KFold(20,shuffle=True,random_state=1)
+    )
+    estimator_name = est.__class__.__name__
+    line = plt.plot(
+        train_set_size, train_scores.mean(axis=1),'--',
+        label = "training"+estimator_name
+        )
+    plt.plot(train_set_size, test_scores.mean(axis=1),'-',
+        label = "test"+estimator_name,c=line[0].get_color())
+    plt.xlabel('Training set size')
+    plt.ylabel('score')
+    plt.ylim(0,1.1)
+
+plot_learning_curve(Ridge(alpha=1),X,y)
+plot_learning_curve(LinearRegression(),X,y)
+plt.legend(loc = (0,1.05),ncol=2,fontsize=11)
+plt.show()
+

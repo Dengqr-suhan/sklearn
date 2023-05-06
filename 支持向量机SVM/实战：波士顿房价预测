@@ -1,0 +1,57 @@
+#导入波士顿房价数据集 打印数据集里的键
+from sklearn.datasets import load_boston
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn import svm
+from sklearn.datasets import make_blobs
+from sklearn.model_selection import train_test_split
+boston = load_boston()
+print(boston.keys())
+print(boston['DESCR'])
+
+from sklearn.model_selection import train_test_split
+X, y = boston.data, boston.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=8)
+print(X_train.shape)
+print(X_test.shape)
+
+from sklearn.svm import SVR
+for kernel in ['linear','rbf']:
+    svr = SVR(kernel=kernel)
+    svr.fit(X_train, y_train)
+    print(kernel,'核函数的模型训练集得分：{:.3f}'.format(
+        svr.score(X_train, y_train)))
+    print(kernel,'核函数的模型测试集得分：{:.3f}'.format(
+        svr.score(X_test, y_test)))
+    
+plt.plot(X.min(axis=0),'v',label='min')
+plt.plot(X.max(axis=0),'^',label='max')
+plt.yscale('log')
+plt.legend(loc='best')
+plt.xlabel('features')
+plt.ylabel('feature magnitude')
+plt.show()
+
+from sklearn.preprocessing import StandardScaler
+scaler = StandardScaler()
+scaler.fit(X_train)
+X_train_scaled = scaler.transform(X_train)
+X_test_scaled = scaler.transform(X_test)
+plt.plot(X_train_scaled.min(axis=0),'v',label='train set min')
+plt.plot(X_train_scaled.max(axis=0),'^',label='train set max')
+plt.plot(X_test_scaled.min(axis=0),'v',label='test set min')
+plt.plot(X_test_scaled.max(axis=0),'^',label='test set max')
+plt.yscale('log')
+plt.legend(loc='best')
+plt.xlabel('scaled features')
+plt.ylabel('scaled feature magnitude')
+plt.show()
+
+
+for kernel in ['linear','rbf']:
+    svr = SVR(kernel=kernel)
+    svr.fit(X_train_scaled, y_train)
+    print('数据预处理后',kernel,'核函数的模型训练集得分：{:.3f}'.format(
+        svr.score(X_train_scaled, y_train)))
+    print('数据预处理后',kernel,'核函数的模型测试集得分：{:.3f}'.format(
+        svr.score(X_test_scaled, y_test)))

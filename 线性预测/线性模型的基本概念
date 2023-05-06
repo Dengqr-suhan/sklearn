@@ -1,0 +1,53 @@
+#线性模型的一般公式
+import numpy as np
+import matplotlib.pyplot as plt
+#令x为-5到5的，元素数为100的等差数列
+x = np.linspace(-5,5,100)
+y = 0.5*x + 3
+plt.plot(x,y,c="orange")
+plt.title('staight line')
+plt.show()
+
+#两点确定一条直线
+#导入线性回归模型
+from sklearn.linear_model import LinearRegression
+#X为大写 是矩阵 是两点的横坐标 y是两点的纵坐标
+X = [[1], [4]]
+y = [3,5]
+#拟合
+lr = LinearRegression().fit(X,y)
+#画出两个点和直线的图形
+z = np.linspace(0,5,20)
+plt.scatter(X, y, s=80)
+plt.plot(z, lr.predict(z.reshape(-1,1)), c='k')
+plt.title("predict line")
+plt.show()
+#看看直线方程
+print("y = {:.3f}".format(lr.coef_[0]), 'x', '+ {:.3f}'.format(lr.intercept_))
+
+#接下来我们试试三个点
+X = [[1], [4], [3]]
+y = [3,5,3]
+lr = LinearRegression().fit(X,y)
+z = np.linspace(0,5,20)
+plt.scatter(X,y,s=80)
+plt.plot(z, lr.predict(z.reshape(-1,1)), c='k')
+plt.title("predict line 2")
+plt.show()
+print("y = {:.3f}".format(lr.coef_[0]), 'x', '+ {:.3f}'.format(lr.intercept_))
+
+#在现实当中，数据量往往很多，我们来用更多的数据进行实验
+
+from sklearn.datasets import make_regression
+X, y = make_regression(
+    n_features=1 , n_samples=50, n_informative=1, noise=50, random_state=1
+)
+reg = LinearRegression()
+reg.fit(X,y)
+z = np.linspace(-3,3,200).reshape(-1,1)
+plt.scatter(X,y,c='b',s=60)
+plt.plot(z, reg.predict(z), c='k')
+plt.title("line regression")
+plt.show()
+print('直线的系数（斜率）为:{:.2f}'.format(reg.coef_[0]))
+print('直线的截距为:{:.2f}'.format(reg.intercept_))

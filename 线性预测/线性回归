@@ -1,0 +1,20 @@
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import LinearRegression
+from sklearn.datasets import make_regression
+X, y = make_regression(n_samples=200, n_features=2, n_informative=2, random_state=8)
+X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=8)
+lr = LinearRegression().fit(X_train, y_train)
+print("y = {:.3f}".format(lr.coef_[0]), 'X1', '+{:.3f}'.format(lr.coef_[1]), 'X2',' {}'.format(lr.intercept_))
+#看看得分
+print("训练集得分：{}".format(lr.score(X_train, y_train)))
+print("测试集得分：{}".format(lr.score(X_test, y_test)))
+#得分都是1（满分），这是因为没有噪音的影响
+
+#接下来我们试试sklearn里面 真实的数据集
+from sklearn.datasets import load_diabetes
+X, y = load_diabetes().data, load_diabetes().target
+X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=8)
+lr = LinearRegression().fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(lr.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(lr.score(X_test, y_test)))
+#出现了过拟合现象：测试集得分<训练集得分

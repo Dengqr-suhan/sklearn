@@ -1,0 +1,73 @@
+#导入红酒集
+import numpy as np
+from sklearn.datasets import load_wine
+import matplotlib.pyplot as plt
+#导入支持向量机
+from sklearn import svm
+from sklearn.datasets import make_blobs
+#定义一个函数来画图
+def make_meshgrid(x, y):
+    x_min,x_max = x.min() - 1,x.max()+1
+    y_min,y_max = y.min() - 1,y.max()+1
+    xx,yy = np.meshgrid(np.arange(x_min,x_max,.02),
+                    np.arange(y_min,y_max,.02))
+    return xx, yy
+
+#定义一个绘制等高线的函数
+def plot_contours(ax, clf, xx, yy, **params):
+    z = clf.predict(np.c_[xx.ravel(),yy.ravel()])
+    z = z.reshape(xx.shape)
+    out = ax.contourf(xx, yy, z, **params)
+    return out
+
+wine = load_wine()
+X = wine.data[:,:2]
+y = wine.target
+
+C = 1.0 #SVM的正则化参数
+models = (svm.SVC(kernel='linear', C=C), svm.LinearSVC(C=C), svm.SVC(kernel='rbf', gamma=0.7, C=C), svm.SVC(kernel='poly', degree=3, C=C))
+models = (clf.fit(X, y) for clf in models)
+
+#设定图题
+titles = ('SVC with linear kernel', 'linearSVC(linear kernel)','SVC with RBF kernel','SVC with polynomial (degree 3) kernel')
+
+#设定一个子图形的个数和排列方式
+fig, sub = plt.subplots(2, 2)
+plt.subplots_adjust(wspace=0.4, hspace=0.4)
+X0, X1 = X[:,0], X[:,1]
+xx, yy = make_meshgrid(X0, X1)
+
+for clf, title, ax in zip(models, titles, sub.flatten()):
+    plot_contours(ax, clf, xx, yy, cmap=plt.cm.plasma, alpha=0.8)
+    ax.scatter(X0, X1, c=y, cmap=plt.cm.plasma, s=20, edgecolors='k')
+    ax.set_xlim(xx.min(), xx.max())
+    ax.set_ylim(yy.min(), yy.max())
+    ax.set_xlabel("Feature 0")
+    ax.set_ylabel("Featrue 1")
+    ax.set_xticks(())
+    ax.set_yticks(())
+    ax.set_title(title)
+
+plt.show()
+
+#对于gamma参数的调整
+C = 1.0
+models = (svm.SVC(kernel='rbf', gamma=0.1,C=C),svm.SVC(kernel='rbf', gamma=1,C=C),svm.SVC(kernel='rbf', gamma=10,C=C))
+models = (clf.fit(X, y) for clf in models)
+title = (
+    'gamma=0.1', 'gamma=1', 'gamma=10'
+)
+fig, sub =plt.subplots(1, 3, figsize= (10,3))
+X0, X1 = X[:,0], X[:,1]
+xx, yy = make_meshgrid(X0,X1)
+for clf, title, ax in zip(models, titles, sub.flatten()):
+    plot_contours(ax, clf, xx, yy, cmap=plt.cm.plasma, alpha=0.8)
+    ax.scatter(X0, X1, c=y, cmap=plt.cm.plasma, s=20, edgecolors='k')
+    ax.set_xlim(xx.min(), xx.max())
+    ax.set_ylim(yy.min(), yy.max())
+    ax.set_xlabel("Feature 0")
+    ax.set_ylabel("Featrue 1")
+    ax.set_xticks(())
+    ax.set_yticks(())
+    ax.set_title(title)
+plt.show()

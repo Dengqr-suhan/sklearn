@@ -1,0 +1,31 @@
+#导入数据集获取工具
+from sklearn.datasets import fetch_openml
+from sklearn.model_selection import train_test_split
+import numpy as np
+import matplotlib.pyplot as plt
+from sklearn.neural_network import MLPClassifier
+mnist = fetch_openml('MNIST_784')
+print(mnist)
+#注意这里，fetch_mldata 在低版本的sklearn里是有的 但高版本里面没有
+X = mnist.data/255.
+y = mnist.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, train_size=5000, test_size=1000, random_state=62)
+
+#训练MLP神经网络
+mlp_hw = MLPClassifier(solver='lnfgs', hidden_layer_sizes=[100,100], activation='relu', alpha=1e-5, random_state=62)
+mlp_hw.fit(X_train, y_train)
+
+#使用模型进行数字识别
+from PIL import Image #这是图像处理工具
+image = Image.open("path").convert('F')
+#调整图像的大小
+image= image.resize((28.28))
+arr = []
+#将图像的像素点作为预测的特征值
+for i in range(28):
+    for j in range(28):
+        pixel = 1.0 - float(image.getpixel((j,i)))/255
+        arr.append(pixel)
+#由于只有一个样本 所以我们需要进行reshape操作
+arr1 = np.array(arr).reshape(1, -1)
+print("图片中的数字是：{}",format(mlp_hw.predict(arr1)[0]))

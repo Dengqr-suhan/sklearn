@@ -1,0 +1,40 @@
+import pandas
+data = pandas.read_csv(r"E:\下载2\adult.csv", header=None, index_col=False, names=['年龄','单位性质','权重','学历','受教育时长','婚姻状况','职业','家庭情况','种族','性别','资产所得','资产损失','周工作时长','原籍','收入'])
+data_lite = data[['年龄','单位性质','学历','性别','周工作时长','职业','收入']]
+print(data_lite.head())
+
+#接下来我们用get_dummies处理数据
+data_dummies = pandas.get_dummies(data_lite)
+#对比样本原始特征和虚拟变量特征
+print('原始特征：{}'.format(list(data_lite.columns)))
+print('虚拟变量特征：{}'.format(list(data_dummies.columns)))
+print(data_dummies.head())
+#01计算机看得懂
+#定义数据集的特征值
+features = data_dummies.loc[:,'年龄':'职业_ Transport-moving']
+#将特征值赋值为X
+X = features.values
+#将收入大于50k作为预测目标
+y = data_dummies['收入_ >50K'].values
+#打印数据形态
+print('特征形态{}，标签形态{}'.format(X.shape, y.shape))
+
+import numpy as np
+import matplotlib.pyplot as plt
+from matplotlib.colors import ListedColormap
+#导入tree模型和数据集加载工具
+from sklearn import tree
+from sklearn.model_selection import train_test_split
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=0)
+clf = tree.DecisionTreeClassifier(max_depth=5)
+clf.fit(X_train, y_train)
+print("模型得分：{:.3f}".format(clf.score(X_test, y_test)))
+#得分较高，进行下一步
+
+#导入Mr.Z的数据
+mr_z = [[37, 40, 0,0,0,0,0,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0,0,1,0,0,0,0,1,0,1,0,0,0,0,0,0,0,0,0,0,0,0,0]]
+pre = clf.predict(mr_z)
+if pre==1:
+    print("去吧")
+else:
+    print("别了")

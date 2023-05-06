@@ -1,0 +1,43 @@
+#依照书中数据，编写如下代码
+import numpy as np
+X = np.array([
+    [0,1,0,1],
+    [1,1,1,0],
+    [0,1,1,0],
+    [0,0,0,1],
+    [0,1,1,0],
+    [0,1,0,1],
+    [1,0,0,1]]
+)
+y = np.array([0,1,1,0,1,0,0])
+#统计每个特征为1的数量
+counts = {}
+for label in np.unique(y):
+    counts[label] = X[y == label].sum(axis=0)
+print('feature counts:{}'.format(counts))
+
+#导入贝努力贝叶斯
+from sklearn.naive_bayes import BernoulliNB
+#使用此算法来拟合数据
+clf = BernoulliNB()
+clf.fit(X,y)
+#要预测的这一天，没有北风，也没有闷热
+#但是多云且天气预报说没有雨
+next_day = [[0,0,1,0]]
+pre = clf.predict(next_day)
+
+if pre==1:
+    print("下雨啦！")
+else:
+    print("晴天真好！")
+
+#另一天，刮了北风，很闷热
+#但是云量不多，天气预报说有雨
+another_day = [[1,1,0,1]]
+pre2 = clf.predict(another_day)
+if pre2==1:
+    print("下雨啦！")
+else:
+    print("晴天真好！")
+#接下来我们看看预测分类的概率
+print("another_day预测分类的概率:{}".format(clf.predict_proba(another_day)))

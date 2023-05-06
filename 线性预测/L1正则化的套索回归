@@ -1,0 +1,21 @@
+#糖尿病数据集
+from sklearn.datasets import load_diabetes
+from sklearn.model_selection import train_test_split
+from sklearn.linear_model import Lasso
+import matplotlib.pyplot as plt
+import numpy as np
+
+X, y = load_diabetes().data, load_diabetes().target
+X_train, X_test, y_train, y_test = train_test_split(X,y,random_state=8)
+lasso = Lasso().fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(lasso.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(lasso.score(X_test, y_test)))
+print("套索回归使用的特征数：{}".format(np.sum(lasso.coef_!= 0)))
+#这样的得分是十分糟糕的 因为10个特征数，套索回归只用了3个
+
+#我们需要对套索回归的参数进行调节
+lasso01 = Lasso(alpha = 0.1, max_iter=100000).fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(lasso01.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(lasso01.score(X_test, y_test)))
+print("套索回归使用的特征数：{}".format(np.sum(lasso01.coef_!= 0)))
+#通过降低alpha值可以拟合出更复杂的模型

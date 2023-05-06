@@ -1,0 +1,82 @@
+#导入数据集
+from sklearn.datasets import load_breast_cancer
+cancer = load_breast_cancer()
+print("==============\n")
+#打印数据集键值
+print(cancer.keys())
+print("\n==============\n")
+#打印肿瘤的分类
+print("==============\n")
+print('肿瘤的分类：{}'.format(cancer['target_names']))
+print("\n==============\n")
+#打印肿瘤的特征值
+print("==============\n")
+print('肿瘤的特征值：',cancer['feature_names'])
+print("\n==============\n")
+
+#导入高斯贝叶斯模型
+from sklearn.naive_bayes import GaussianNB
+gnb = GaussianNB()
+from sklearn.model_selection import train_test_split
+
+X, y =cancer.data, cancer.target
+X_train, X_test, y_train, y_test = train_test_split(X, y, random_state=38)
+gnb.fit(X_train, y_train)
+print("训练集得分：{:.3f}".format(gnb.score(X_train, y_train)))
+print("测试集得分：{:.3f}".format(gnb.score(X_test, y_test)))
+#得分相当高了
+#接下来我们随便用某一组数据来进行模拟预测
+
+print("模型预测的分类是：{}".format(gnb.predict([X[312]])))
+print("数据真实的分类：{}".format(y[312]))
+#预测正确！
+
+#接下来我们来绘制高斯贝叶斯的学习曲线
+#ps：学习曲线指的是随着样本数增加，模型得分的变化曲线
+import matplotlib.pyplot as plt
+from sklearn.model_selection import learning_curve,KFold
+from sklearn.model_selection import ShuffleSplit
+import numpy as np
+def plot_learning_curve(est,X,y):
+    train_set_size,train_scores, test_scores = learning_curve(
+        est,X,y,train_sizes=np.linspace(.1, 1, 20), cv=KFold(20,shuffle=True,random_state=1)
+    )
+    estimator_name = est.__class__.__name__
+    line = plt.plot(
+        train_set_size, train_scores.mean(axis=1),'--',
+        label = "training"+estimator_name
+        )
+    plt.plot(train_set_size, test_scores.mean(axis=1),'-',
+        label = "test"+estimator_name,c=line[0].get_color())
+    plt.xlabel('Training set size')
+    plt.ylabel('score')
+    plt.ylim(0,1.1)
+
+est = GaussianNB()
+plot_learning_curve(est, X, y)
+plt.show()
+
+#以上是我用之前线性回归里所定义的学习曲线绘制的
+#不好看！
+
+def plt_learning_curve(est, title, X, y, ylim=None, cv=None, n_jobs=1, train_sizes=np.linspace(.1, 1.0, 5)):
+    plt.figure()
+    plt.title(title)
+    if ylim is not None:
+        plt.ylim(*ylim)
+    #设定横轴标签
+    plt.xlabel("Training examples")
+    #设定纵轴标签
+    plt.ylabel("Score")
+    train_sizes, train_scores, test_scores = learning_curve(est, X, y, cv=cv, n_jobs=n_jobs, train_sizes=train_sizes)
+    train_scores_mean = np.mean(train_scores, axis=1)
+    test_scores_mean = np.mean(test_scores, axis=1)
+    plt.grid()
+    plt.plot(train_sizes, train_scores_mean, 'o-', color='r', label='Training scores')
+    plt.plot(train_sizes, test_scores_mean, 'o-', color='g', label="Cross-validation score")
+    plt.legend(loc='lower right')
+    return plt
+title = "Learning curves(Naive Bayes)"
+cv = ShuffleSplit(n_splits=100, test_size=0.2, random_state=0)
+plt_learning_curve(est,title,X,y,ylim=(0.9, 1.01),cv=cv,n_jobs=4)
+plt.show()

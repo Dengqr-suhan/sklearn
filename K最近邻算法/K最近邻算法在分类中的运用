@@ -1,0 +1,55 @@
+from sklearn.datasets import make_blobs              #数据集生成器
+from sklearn.neighbors import KNeighborsClassifier   #KNN分类器
+import matplotlib.pyplot as plt                      #画图工具
+from sklearn.model_selection import train_test_split #导入数据拆分工具
+
+data = make_blobs(n_samples=200,centers=2,random_state=8) #样本生成数为200 分类为2
+X,y=data
+plt.scatter(X[:,0], X[:,1], c=y, cmap=plt.cm.spring, edgecolor='k')
+plt.show()
+
+"""
+上面代码所生成的图是训练集
+为已知数据
+
+
+import numpy as np
+clf = KNeighborsClassifier()
+clf.fit(x,y)
+
+#下面的代码用来画图
+x_min, x_max = x[:,0].min() - 1, x[:,0].max() + 1
+y_min, y_max = x[:,0].min() - 1, x[:,0].max() + 1
+xx, yy = np.meshgrid(
+    np.arange(x_min, x_max, .02),
+    np.arange(y_min, y_max, .02)
+)
+z = clf.predict(np.c_[xx.ravel(), yy.ravel()])
+z = z.reshape(xx.shape)
+plt.pcolormesh(xx, yy, z, cmap=plt.cm.Spectral)
+plt.scatter(x[:, 0], x[:, 1], c=y, cmap=plt.cm.spring, edgecolor='k')
+plt.xlim(xx.min(), xx.max())
+plt.ylim(yy.min(), yy.max())
+plt.title("Classifier:KNN")
+plt.show()
+
+上面纯手敲 错了 因为没注意大小写的问题
+"""
+#下面的代码用于画图
+import numpy as np
+clf = KNeighborsClassifier()
+clf.fit(X,y)
+x_min,x_max = X[:,0].min() - 1,X[:,0].max()+1
+y_min,y_max = X[:,1].min() - 1,X[:,1].max()+1
+xx,yy = np.meshgrid(np.arange(x_min,x_max,.02),
+                    np.arange(y_min,y_max,.02))
+Z = clf.predict(np.c_[xx.ravel(),yy.ravel()])
+Z = Z.reshape(xx.shape)
+plt.pcolormesh(xx,yy,Z,cmap=plt.cm.Spectral)
+plt.scatter(X[:,0],X[:,1],c=y,cmap=plt.cm.spring,edgecolors='k')
+plt.xlim(xx.min(),xx.max())
+plt.ylim(yy.min(),yy.max())
+plt.title("Classifier:KNN")
+
+plt.scatter(6.75,4.82, marker="*", c="red", s=200)
+plt.show()

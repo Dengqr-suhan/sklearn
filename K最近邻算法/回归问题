@@ -1,0 +1,32 @@
+from sklearn.datasets import make_regression         #回归数据集生成器
+from sklearn.neighbors import KNeighborsRegressor   #回归KNN分类器
+import matplotlib.pyplot as plt                      #画图工具
+from sklearn.model_selection import train_test_split #导入数据拆分工具
+import numpy as np
+X,y = make_regression(n_features=1, n_informative=1, noise=50, random_state=8)
+plt.scatter(X,y,c="orange",edgecolors='k')
+plt.show()
+
+reg = KNeighborsRegressor()
+reg.fit(X,y)
+#进行可视化处理
+z = np.linspace(-3, 3, 200).reshape(-1,1)
+plt.plot(z, reg.predict(z),c='k',linewidth=3)
+plt.title("KNN Regressor")
+plt.show()
+
+per = reg.score(X,y)
+print(f"模型准确度：{per}")
+#这个准确度差强人意，我们将n_neighbors参数降低为2，我们再试试
+
+reg2 = KNeighborsRegressor(n_neighbors=2)
+reg2.fit(X,y)
+#进行可视化处理
+z = np.linspace(-3, 3, 200).reshape(-1,1)
+plt.plot(z, reg.predict(z),c='k',linewidth=3)
+plt.title("KNN Regressor: n_neighbors=2")
+plt.show()
+
+per = reg2.score(X,y)
+print(f"模型准确度：{per}")
+#准确度提高了

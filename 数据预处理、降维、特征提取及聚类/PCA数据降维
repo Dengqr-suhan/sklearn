@@ -1,0 +1,39 @@
+#首先先处理一下数据
+from sklearn.datasets import load_wine
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+scaler = StandardScaler()
+wine = load_wine()
+X = wine.data
+y = wine.target
+X_scaler = scaler.fit_transform(X)
+print(X_scaler.shape)
+
+#导入pca进行处理
+from sklearn.decomposition import PCA
+pca = PCA(n_components=2)
+pca.fit(X_scaler)
+X_pca = pca.transform(X_scaler)
+print(X_pca.shape)
+#数据由13个特征降维到了两个特征
+
+#接下来我们进行可视化处理
+X0 = X_pca[wine.target==0]
+X1 = X_pca[wine.target==1]
+X2 = X_pca[wine.target==2]
+plt.scatter(X0[:,0],X0[:,1], c='b', s=60, edgecolors='k')
+plt.scatter(X1[:,0],X1[:,1], c='g', s=60, edgecolors='k')
+plt.scatter(X2[:,0],X2[:,1], c='r', s=60, edgecolors='k')
+plt.legend(wine.target_names, loc="best")
+plt.xlabel("component 1")
+plt.ylabel("component 2")
+plt.show()
+
+#我们再来看看这两个特征是怎么反映之前的13个特征的
+plt.matshow(pca.components_, cmap='plasma')
+plt.yticks([0,1], ['component 1','component 2'])
+plt.colorbar()
+plt.xticks(range(len(wine.feature_names)),wine.feature_names, rotation=60, ha="left")
+plt.show()
+

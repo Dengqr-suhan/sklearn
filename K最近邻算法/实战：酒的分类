@@ -1,0 +1,25 @@
+    
+#导入sklearn里酒的数据集
+from sklearn.datasets import load_wine
+wine_dataset = load_wine()
+
+#生成训练集和数据集
+
+from sklearn.model_selection import train_test_split  #数据拆分工具
+X_train, X_test, y_train, y_test = train_test_split(
+    wine_dataset['data'], wine_dataset['target'], random_state=0
+)
+
+#以上我们做好了所有的准备工作 准备建模
+from sklearn.neighbors import KNeighborsClassifier
+knn = KNeighborsClassifier(n_neighbors=1)
+knn.fit(X_train,y_train)         #这个步骤叫做拟合
+per = knn.score(X_test, y_test)
+print(f"模型准确度：{per}")
+
+#建模完成后 导入新样本进行分类预测
+
+import numpy as np
+X_new = np.array([[13.2,2.77,2.51,18.5,96.6,1.04,2.55,0.57,1.47,6.2,1.05,3.33,820]])
+prediction = knn.predict(X_new)
+print("预测红酒的分类为：{ }",format(wine_dataset['target_names'][prediction]))

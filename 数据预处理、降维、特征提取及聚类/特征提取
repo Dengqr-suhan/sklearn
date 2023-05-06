@@ -1,0 +1,39 @@
+#PCA主成分分析法用于特征提取
+from sklearn.model_selection import train_test_split
+from sklearn.preprocessing import StandardScaler
+import matplotlib.pyplot as plt
+from sklearn.decomposition import PCA
+#我们导入一个相对复杂的数据集——LFW人脸识别数据集
+from sklearn.datasets import fetch_lfw_people
+faces = fetch_lfw_people(min_faces_per_person=20, resize=0.8)
+fig, axes = plt.subplots(3,4,figsize=(12,9), subplot_kw={'xticks':(), 'yticks':()})
+for target,image,ax in zip(faces.target,faces.images,axes.ravel()):
+    ax.imshow(image, cmap=plt.cm.gray)
+ax.set_title(faces.target_names[target])
+plt.show()
+#在数据未进行处理的情况下 我们来试试训练一个神经网络
+from sklearn.neural_network import MLPClassifier
+X_train, X_test, y_train, y_test=train_test_split(faces.target, faces.date/255, random_state=62)
+mlp = MLPClassifier(hidden_layer_sizes=[100,100], random_state=62, max_iter=400)
+mlp.fit(X_train, y_train)
+print("模型分数：{}".format(mlp.score(X_test, y_test))) 
+
+#接下来我们使用PCA数据白化功能
+pca = PCA(whiten=True, n_components=0.9, random_state=62).fit(X_train)
+X_train_whiten =pca.transform(X_train)
+X_test_whiten = pca.transform(X_test)
+
+mlp.fit(X_train_whiten, y_train)
+print("模型分数：{}".format(mlp.score(X_test_whiten, y_test))) 
+
+#非负矩阵分解用于特征提取（NMF）
+from sklearn.decomposition import NMF
+nmf = NMF(n_components=105, random_state=62).fit(X_train)
+X_train_nmf = nmf.transform(X_train)
+X_test_nmf = nmf.transform(X_test)
+
+mlp.fit(X_train_nmf,y_train)
+print("模型分数：{}".format(mlp.score(X_test_nmf, y_test))) 
+
+
+
